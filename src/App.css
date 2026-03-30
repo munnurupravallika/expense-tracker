@@ -1,0 +1,98 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+}
+
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.summary {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.summary h2 {
+  margin: 0;
+}
+
+.chart-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+input,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+button {
+  background: #0d6efd;
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background: #0b5ed7;
+}
+
+.filter-box {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f2f2f2;
+  padding: 12px 15px;
+  margin-top: 12px;
+  border-radius: 10px;
+}
+
+.delete-btn {
+  background: #ff3b3b;
+  padding: 8px 14px;
+}
+
+.delete-btn:hover {
+  background: #d62828;
+}
+
+.auth-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 350px;
+  margin: 40px auto;
+  text-align: center;
+}
