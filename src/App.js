@@ -32,7 +32,7 @@ function App() {
 
   const fetchTransactions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/transactions");
+      const res = await axios.get("https://expense-tracker-i4if.onrender.com");
       setTransactions(res.data);
     } catch (error) {
       console.log(error);
@@ -42,7 +42,7 @@ function App() {
   // Signup
   const handleSignup = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/signup", {
+      const res = await axios.post("https://expense-tracker-i4if.onrender.com", {
         name,
         email,
         password,
@@ -63,7 +63,7 @@ function App() {
   // Login
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/login", {
+      const res = await axios.post("https://expense-tracker-i4if.onrender.com", {
         email,
         password,
       });
@@ -90,7 +90,7 @@ function App() {
   const addTransaction = async () => {
     if (!title || !amount || !date) return;
 
-    await axios.post("http://localhost:5000/transactions", {
+    await axios.post("https://expense-tracker-i4if.onrender.com", {
       title,
       amount: Number(amount),
       date,
@@ -106,13 +106,13 @@ function App() {
 
   // Delete
   const deleteTransaction = async (id) => {
-    await axios.delete(`http://localhost:5000/transactions/${id}`);
+    await axios.delete(`https://expense-tracker-i4if.onrender.com/${id}`);
     fetchTransactions();
   };
 
   // Clear all
   const clearAllTransactions = async () => {
-    await axios.delete("http://localhost:5000/transactions");
+    await axios.delete("https://expense-tracker-i4if.onrender.com");
     fetchTransactions();
   };
 
