@@ -3,16 +3,27 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const app = express();
 
-app.use(cors());
+// ✅ CORS FIX (IMPORTANT FOR VERCEL)
+app.use(
+  cors({
+    origin: "https://expense-tracker-three-pearl-70.vercel.app",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
+// ✅ MongoDB connection (USE ENV)
 mongoose
-  .connect("mongodb+srv://admin:Admin%40123@cluster0.nci7hgn.mongodb.net/expenseTrackerDB?retryWrites=true&w=majority&appName=Cluster0")
-  .then(() => console.log("MongoDB Connected"))
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected ✅"))
   .catch((err) => console.log("MongoDB Error:", err));
+
+// ================= MODELS =================
 
 const transactionSchema = new mongoose.Schema({
   title: String,
@@ -32,9 +43,13 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
+// ================= ROUTES =================
+
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
+
+// ================= TRANSACTIONS =================
 
 app.get("/transactions", async (req, res) => {
   try {
@@ -49,7 +64,6 @@ app.post("/transactions", async (req, res) => {
   try {
     const newTransaction = new Transaction(req.body);
     await newTransaction.save();
-    console.log("Added:", req.body);
     res.json({ message: "Transaction added successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error adding transaction" });
@@ -73,6 +87,8 @@ app.delete("/transactions", async (req, res) => {
     res.status(500).json({ message: "Error clearing transactions" });
   }
 });
+
+// ================= AUTH =================
 
 app.post("/signup", async (req, res) => {
   try {
@@ -116,7 +132,7 @@ app.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      "secretkey",
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
@@ -133,6 +149,8 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Error logging in" });
   }
 });
+
+// ================= SERVER =================
 
 const PORT = process.env.PORT || 5000;
 
