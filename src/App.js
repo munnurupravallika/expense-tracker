@@ -5,14 +5,16 @@ import { FaTrash, FaMoneyBillWave } from "react-icons/fa";
 import "./App.css";
 
 function App() {
-  // Auth states
-  const [isLogin, setIsLogin] = useState(true);
+  const API_URL =
+    process.env.REACT_APP_API_URL || "https://expense-tracker-i4if.onrender.com";
+
+  const [isLogin, setIsLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Expense states
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
@@ -20,35 +22,51 @@ function App() {
   const [category, setCategory] = useState("Food");
   const [transactions, setTransactions] = useState([]);
 
-  // Auto login
   useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    setIsAuthenticated(true);
+  }
+}, []);
+
+const fetchTransactions = async () => {
+  try {
     const token = localStorage.getItem("token");
-    if (token) setIsAuthenticated(true);
-  }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) fetchTransactions();
-  }, [isAuthenticated]);
+    const res = await axios.get(`${API_URL}/transactions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  const fetchTransactions = async () => {
-    try {
-      const res = await axios.get("https://expense-tracker-i4if.onrender.com");
-      setTransactions(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    setTransactions(res.data);
+  } catch (error) {
+    console.log("Fetch error:", error.response?.data || error.message);
+    alert("Failed to fetch transactions");
+  }
+};
 
-  // Signup
+useEffect(() => {
+  if (isAuthenticated) {
+    fetchTransactions();
+  }
+}, [isAuthenticated]);
+
   const handleSignup = async () => {
+    if (!name || !email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+
     try {
-      const res = await axios.post("https://expense-tracker-i4if.onrender.com", {
+      const res = await axios.post(`${API_URL}/signup`, {
         name,
         email,
         password,
       });
 
       alert(res.data.message);
+
       if (res.data.message === "Signup successful") {
         setIsLogin(true);
         setName("");
@@ -56,67 +74,111 @@ function App() {
         setPassword("");
       }
     } catch (error) {
-      console.log(error);
+      console.log("Signup error:", error);
+      alert("Signup failed");
     }
   };
+const handleLogin = async () => {
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
 
-  // Login
-  const handleLogin = async () => {
-    try {
-      const res = await axios.post("https://expense-tracker-i4if.onrender.com", {
-        email,
-        password,
-      });
+  try {
+    const res = await axios.post(`${API_URL}/login`, {
+      email,
+      password,
+    });
 
-      alert(res.data.message);
+    alert(res.data.message);
 
-      if (res.data.message === "Login successful") {
-        localStorage.setItem("token", res.data.token);
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
-      console.log(error);
-      alert("Login failed");
+    if (res.data.message === "Login successful") {
+      localStorage.setItem("token", res.data.token);
+      setIsAuthenticated(true);
+      setEmail("");
+      setPassword("");
     }
-  };
+  } catch (error) {
+    console.log("Login error:", error.response?.data || error.message);
+    alert("Login failed");
+  }
+};
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    setTransactions([]);
   };
 
-  // Add
-  const addTransaction = async () => {
-    if (!title || !amount || !date) return;
+ const addTransaction = async () => {
+  if (!title || !amount || !date) {
+    alert("Please fill all transaction fields");
+    return;
+  }
 
-    await axios.post("https://expense-tracker-i4if.onrender.com", {
+  try {
+    const token = localStorage.getItem("token");
+
+    const newData = {
       title,
       amount: Number(amount),
       date,
       type,
       category,
+    };
+
+    await axios.post(`${API_URL}/transactions`, newData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     fetchTransactions();
+
     setTitle("");
     setAmount("");
     setDate("");
-  };
+    setType("expense");
+    setCategory("Food");
+  } catch (error) {
+    console.log("Add error:", error.response?.data || error.message);
+    alert("Failed to add transaction");
+  }
+};
 
-  // Delete
   const deleteTransaction = async (id) => {
-    await axios.delete(`https://expense-tracker-i4if.onrender.com/${id}`);
-    fetchTransactions();
+    try {
+       const token = localStorage.getItem("token");
+
+await axios.delete(`${API_URL}/transactions/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+      fetchTransactions();
+    } catch (error) {
+      console.log("Delete error:", error);
+      alert("Failed to delete transaction");
+    }
   };
 
-  // Clear all
-  const clearAllTransactions = async () => {
-    await axios.delete("https://expense-tracker-i4if.onrender.com");
-    fetchTransactions();
-  };
+ const clearAllTransactions = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  // Calculations
+    await axios.delete(`${API_URL}/transactions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    fetchTransactions();
+  } catch (error) {
+    console.log("Clear all error:", error);
+    alert("Failed to clear transactions");
+  }
+};
+
   const income = transactions
     .filter((t) => t.type === "income")
     .reduce((a, t) => a + t.amount, 0);
@@ -174,7 +236,7 @@ function App() {
           </p>
         </div>
       ) : (
-        <>
+        <div className="tracker-box">
           <h1>Expense Tracker</h1>
           <button onClick={handleLogout}>Logout</button>
 
@@ -196,11 +258,14 @@ function App() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
           />
+
           <input
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount"
+            type="number"
           />
+
           <input
             type="date"
             value={date}
@@ -217,17 +282,20 @@ function App() {
             <option>Travel</option>
             <option>Shopping</option>
             <option>Salary</option>
+            <option>Bills</option>
+            <option>Other</option>
           </select>
 
           <button onClick={addTransaction}>Add</button>
 
-          {/* Transactions Section */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               marginTop: "20px",
+              width: "100%",
+              maxWidth: "500px",
             }}
           >
             <h2>Transactions</h2>
@@ -240,14 +308,8 @@ function App() {
             transactions.map((t) => (
               <div className="transaction-item" key={t._id}>
                 <div>
-                  <span
-                    style={{
-                      color: t.type === "income" ? "green" : "red",
-                    }}
-                  >
-                    <FaMoneyBillWave
-                      style={{ marginRight: "6px", fontSize: "14px" }}
-                    />
+                  <span style={{ color: t.type === "income" ? "green" : "red" }}>
+                    <FaMoneyBillWave style={{ marginRight: "6px", fontSize: "14px" }} />
                     {t.title} - ₹{t.amount}
                   </span>
                   <br />
@@ -265,7 +327,7 @@ function App() {
               </div>
             ))
           )}
-        </>
+        </div>
       )}
     </div>
   );

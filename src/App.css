@@ -1,98 +1,79 @@
 body {
   margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #74ebd5, #9face6);
+}
+
+#root {
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 700px;
-  margin: 40px auto;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.summary {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.summary h2 {
-  margin: 0;
-}
-
-.chart-box {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(to right, #72dfd4, #9bb8f3);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   justify-content: center;
-  margin-bottom: 15px;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-input,
-select {
-  padding: 10px;
+.auth-box,
+.tracker-box {
+  background: #eef2f5;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.auth-box input,
+.tracker-box input,
+.tracker-box select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 button {
-  background: #0d6efd;
+  background: #1f6feb;
   color: white;
   border: none;
-  padding: 9px 14px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
+  margin-top: 10px;
 }
 
 button:hover {
-  background: #0b5ed7;
+  opacity: 0.9;
 }
 
-.filter-box {
-  margin: 20px 0;
-  text-align: center;
+.logout-btn {
+  background: #444;
+  margin-bottom: 15px;
 }
 
 .transaction-item {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 15px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f2f2f2;
-  padding: 12px 15px;
-  margin-top: 12px;
-  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .delete-btn {
-  background: #ff3b3b;
-  padding: 8px 14px;
-}
-
-.delete-btn:hover {
-  background: #d62828;
-}
-
-.auth-box {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 350px;
-  margin: 40px auto;
-  text-align: center;
+  background: crimson;
+  padding: 8px 10px;
 }

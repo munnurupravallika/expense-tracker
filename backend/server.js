@@ -1,17 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS FIX (IMPORTANT FOR VERCEL)
 app.use(
   cors({
-    origin: "https://expense-tracker-three-pearl-70.vercel.app",
-    credentials: true,
+    origin: [
+      "http://localhost:3000",
+      "https://expense-tracker-three-pearl-70.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   })
 );
 
@@ -92,9 +92,13 @@ app.delete("/transactions", async (req, res) => {
 
 app.post("/signup", async (req, res) => {
   try {
+    console.log("Signup body:", req.body);
+
     const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
+    console.log("Existing user:", existingUser);
+
     if (existingUser) {
       return res.json({ message: "User already exists" });
     }
@@ -108,24 +112,31 @@ app.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
+    console.log("User saved successfully");
 
     res.json({ message: "Signup successful" });
   } catch (error) {
-    console.log(error);
+    console.log("Signup error:", error);
     res.status(500).json({ message: "Error signing up" });
   }
 });
 
 app.post("/login", async (req, res) => {
   try {
+    console.log("Login body:", req.body);
+
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+    console.log("Found user:", user);
+
     if (!user) {
       return res.json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
+
     if (!isMatch) {
       return res.json({ message: "Invalid password" });
     }
@@ -145,7 +156,7 @@ app.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.log("Login error:", error);
     res.status(500).json({ message: "Error logging in" });
   }
 });
