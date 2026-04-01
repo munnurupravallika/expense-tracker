@@ -9,7 +9,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://expense-tracker-three-pearl-70.vercel.app",
+    origin: [
+      "http://localhost:3000",
+      "https://expense-tracker-three-pearl-70.vercel.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
