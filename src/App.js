@@ -6,7 +6,7 @@ import "./App.css";
 
 function App() {
   const API_URL =
-    process.env.REACT_APP_API_URL || "https://expense-tracker-i4if.onrender.com";
+    process.env.REACT_APP_API_URL || "https://your-railway-url.up.railway.app";
 
   const [isLogin, setIsLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
