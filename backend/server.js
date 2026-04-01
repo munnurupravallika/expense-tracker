@@ -1,15 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const app = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://expense-tracker-three-pearl-70.vercel.app"
-    ],
+    origin: "https://expense-tracker-three-pearl-70.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
@@ -17,14 +17,13 @@ app.use(
 
 app.use(express.json());
 
-// ✅ MongoDB connection (USE ENV)
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
   .catch((err) => console.log("MongoDB Error:", err));
 
-// ================= MODELS =================
-
+// MODELS
 const transactionSchema = new mongoose.Schema({
   title: String,
   amount: Number,
@@ -43,14 +42,12 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-// ================= ROUTES =================
-
+// ROUTES
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// ================= TRANSACTIONS =================
-
+// TRANSACTIONS
 app.get("/transactions", async (req, res) => {
   try {
     const transactions = await Transaction.find();
@@ -88,19 +85,15 @@ app.delete("/transactions", async (req, res) => {
   }
 });
 
-// ================= AUTH =================
-
+// AUTH
 app.post("/signup", async (req, res) => {
   try {
-    console.log("Signup body:", req.body);
-
     const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
-    console.log("Existing user:", existingUser);
 
     if (existingUser) {
-      return res.json({ message: "User already exists" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -112,7 +105,6 @@ app.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
-    console.log("User saved successfully");
 
     res.json({ message: "Signup successful" });
   } catch (error) {
@@ -123,22 +115,18 @@ app.post("/signup", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    console.log("Login body:", req.body);
-
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    console.log("Found user:", user);
 
     if (!user) {
-      return res.json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isMatch);
 
     if (!isMatch) {
-      return res.json({ message: "Invalid password" });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     const token = jwt.sign(
@@ -161,8 +149,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ================= SERVER =================
-
+// SERVER
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {

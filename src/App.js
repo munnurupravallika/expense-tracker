@@ -47,37 +47,49 @@ const fetchTransactions = async () => {
 };
 
 useEffect(() => {
-  if (isAuthenticated) {
-    fetchTransactions();
-  }
-}, [isAuthenticated]);
+  fetchTransactions();
+  // eslint-disable-next-line
+}, []);
 
   const handleSignup = async () => {
-    if (!name || !email || !password) {
-      alert("Please fill all fields");
-      return;
-    }
+  if (!name || !email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
 
-    try {
-      const res = await axios.post(`${API_URL}/signup`, {
+  try {
+    const res = await axios.post(
+      `${API_URL}/signup`,
+      {
         name,
         email,
         password,
-      });
-
-      alert(res.data.message);
-
-      if (res.data.message === "Signup successful") {
-        setIsLogin(true);
-        setName("");
-        setEmail("");
-        setPassword("");
       }
-    } catch (error) {
-      console.log("Signup error:", error);
-      alert("Signup failed");
+    );
+
+    console.log("Signup response:", res.data);
+
+    if (res.data.message === "Signup successful") {
+      alert("Signup successful ✅");
+
+      setIsLogin(true);   // go to login
+      setName("");
+      setEmail("");
+      setPassword("");
+    } else {
+      alert(res.data.message); // show backend message
     }
-  };
+
+  } catch (error) {
+    console.log("Signup error:", error.response || error);
+
+    alert(
+      error.response?.data?.message ||
+      "Signup failed ❌"
+    );
+  }
+};
+
 const handleLogin = async () => {
   if (!email || !password) {
     alert("Please fill all fields");
@@ -100,7 +112,8 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.log("Login error:", error.response?.data || error.message);
-    alert("Login failed");
+    console.log("Login status:", error.response?.status);
+    alert(error.response?.data?.message || "Login failed");
   }
 };
 
