@@ -28,13 +28,13 @@ mongoose
 
 // MODELS
 const transactionSchema = new mongoose.Schema({
+  userId: String,
   title: String,
   amount: Number,
   date: String,
   type: String,
   category: String,
 });
-
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
 const userSchema = new mongoose.Schema({
@@ -44,6 +44,28 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("User", userSchema);
+const verifyToken = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Invalid token format" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
 
 // ROUTES
 app.get("/", (req, res) => {
@@ -51,18 +73,21 @@ app.get("/", (req, res) => {
 });
 
 // TRANSACTIONS
-app.get("/transactions", async (req, res) => {
+app.get("/transactions", verifyToken, async (req, res) => {
   try {
-    const transactions = await Transaction.find();
+    const transactions = await Transaction.find({ userId: req.userId });
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ message: "Error fetching transactions" });
   }
 });
-
-app.post("/transactions", async (req, res) => {
+app.post("/transactions", verifyToken, async (req, res) => {
   try {
-    const newTransaction = new Transaction(req.body);
+    const newTransaction = new Transaction({
+      ...req.body,
+      userId: req.userId,
+    });
+
     await newTransaction.save();
     res.json({ message: "Transaction added successfully" });
   } catch (error) {
@@ -70,18 +95,26 @@ app.post("/transactions", async (req, res) => {
   }
 });
 
-app.delete("/transactions/:id", async (req, res) => {
+app.delete("/transactions/:id", verifyToken, async (req, res) => {
   try {
-    await Transaction.findByIdAndDelete(req.params.id);
+    const deletedTransaction = await Transaction.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+
+    if (!deletedTransaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
     res.json({ message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting transaction" });
   }
 });
 
-app.delete("/transactions", async (req, res) => {
+app.delete("/transactions", verifyToken, async (req, res) => {
   try {
-    await Transaction.deleteMany({});
+    await Transaction.deleteMany({ userId: req.userId });
     res.json({ message: "All transactions cleared" });
   } catch (error) {
     res.status(500).json({ message: "Error clearing transactions" });
